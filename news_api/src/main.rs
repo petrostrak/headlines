@@ -2,12 +2,12 @@ use std::error::Error;
 
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct Articles {
     articles: Vec<Article>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct Article {
     title: String,
     url: String,
@@ -16,7 +16,8 @@ struct Article {
 fn get_articles(url: &str) -> Result<Articles, Box<dyn Error>> {
     let response = ureq::get(url).call()?.into_string()?;
 
-    dbg!(response);
+    let articles: Articles = serde_json::from_str(&response)?;
+    dbg!(articles);
     todo!()
 }
 
