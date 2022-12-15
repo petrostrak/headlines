@@ -13,3 +13,5 @@ Cargo.lock
 # Added by cargo
 
 .env
+
+.DS_Store
