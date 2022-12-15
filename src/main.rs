@@ -1,4 +1,5 @@
 use colour::{dark_green, yellow};
+use dotenv::dotenv;
 use newsapi::{get_articles, Articles};
 use std::error::Error;
 
@@ -10,10 +11,12 @@ fn render_articles(articles: &Articles) {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let url =
-        "https://newsapi.org/v2/top-headlines?country=us&apiKey=7df214ecd666464198e34e3ca13f77bd";
+    dotenv()?;
+    let api_key = std::env::var("API_KEY")?;
 
-    let articles = get_articles(url)?;
+    let url = "https://newsapi.org/v2/top-headlines?country=us&apiKey=";
+    let url = format!("{}{}", url, api_key);
+    let articles = get_articles(&url)?;
 
     render_articles(&articles);
 

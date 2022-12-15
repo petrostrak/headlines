@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 colour = "0.6.0"
 newsapi = {path = "./newsapi"}
+dotenv = "0.15.0"
