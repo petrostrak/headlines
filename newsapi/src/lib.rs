@@ -6,36 +6,28 @@ const Base_URL: &str = "https://newsapi.org/v2";
 #[derive(thiserror::Error, Debug)]
 pub enum NewsApiError {
     #[error("Failed fetching articles")]
-    RequestFailed(ureq::Error),
+    RequestFailed(#[from] ureq::Error),
     #[error("Failed converting response to string")]
-    FailedResponseToString(std::io::Error),
+    FailedResponseToString(#[from] std::io::Error),
     #[error("Article parsing failed")]
-    ArticleParseFailed(serde_json::Error),
+    ArticleParseFailed(#[from] serde_json::Error),
     #[error("Url parsing failed")]
     UrlParseFailed(#[from] url::ParseError),
+    #[error("Request failed: {0}")]
+    BadRequest(&'static str),
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Articles {
+pub struct NewsAPIResponse {
+    status: String,
     pub articles: Vec<Article>,
+    code: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Article {
     pub title: String,
     pub url: String,
-}
-
-pub fn get_articles(url: &str) -> Result<Articles, NewsApiError> {
-    let response = ureq::get(url)
-        .call()
-        .map_err(|e| NewsApiError::RequestFailed(e))?
-        .into_string()
-        .map_err(|e| NewsApiError::FailedResponseToString(e))?;
-
-    let articles: Articles =
-        serde_json::from_str(&response).map_err(|e| NewsApiError::ArticleParseFailed(e))?;
-    Ok(articles)
 }
 
 pub enum Endpoint {
@@ -101,5 +93,27 @@ impl NewsAPI {
         url.set_query(Some(&country));
 
         Ok(url.to_string())
+    }
+
+    fn fetch(&self) -> Result<NewsAPIResponse, NewsApiError> {
+        let url = self.prepare_url()?;
+        let req = ureq::get(&url).set("Authorization", &self.api_key);
+        let response: NewsAPIResponse = req.call()?.into_json()?;
+
+        match response.status.as_str() {
+            "ok" => return Ok(response),
+            _ => return Err(map_response_err(response.code)),
+        }
+    }
+}
+
+fn map_response_err(code: Option<String>) -> NewsApiError {
+    if let Some(code) = code {
+        match code.as_str() {
+            "apiKeyDisabled" => NewsApiError::BadRequest("Your api key has beed disabled"),
+            _ => NewsApiError::BadRequest("Unknown error"),
+        }
+    } else {
+        NewsApiError::BadRequest("Unknown error")
     }
 }
