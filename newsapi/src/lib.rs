@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use url::Url;
 
-const Base_URL: &str = "https://newsapi.org/v2";
+const BASE_URL: &str = "https://newsapi.org/v2";
 
 #[derive(thiserror::Error, Debug)]
 pub enum NewsApiError {
@@ -24,10 +24,26 @@ pub struct NewsAPIResponse {
     code: Option<String>,
 }
 
+impl NewsAPIResponse {
+    pub fn articles(&self) -> &Vec<Article> {
+        &self.articles
+    }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct Article {
-    pub title: String,
-    pub url: String,
+    title: String,
+    url: String,
+}
+
+impl Article {
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    pub fn url(&self) -> &str {
+        &self.url
+    }
 }
 
 pub enum Endpoint {
@@ -58,33 +74,33 @@ impl ToString for Country {
     }
 }
 
-struct NewsAPI {
+pub struct NewsAPI {
     api_key: String,
     endpoint: Endpoint,
     country: Country,
 }
 
 impl NewsAPI {
-    fn new(api_key: &str, country: Country) -> NewsAPI {
+    pub fn new(api_key: &str) -> NewsAPI {
         NewsAPI {
             api_key: api_key.to_string(),
             endpoint: Endpoint::TopHeadlines,
-            country: country,
+            country: Country::Us,
         }
     }
 
-    fn endpoint(&mut self, endpoint: Endpoint) -> &mut NewsAPI {
+    pub fn endpoint(&mut self, endpoint: Endpoint) -> &mut NewsAPI {
         self.endpoint = endpoint;
         self
     }
 
-    fn country(&mut self, country: Country) -> &mut NewsAPI {
+    pub fn country(&mut self, country: Country) -> &mut NewsAPI {
         self.country = country;
         self
     }
 
     fn prepare_url(&self) -> Result<String, NewsApiError> {
-        let mut url = Url::parse(Base_URL)?;
+        let mut url = Url::parse(BASE_URL)?;
         url.path_segments_mut()
             .unwrap()
             .push(&self.endpoint.to_string());
@@ -95,7 +111,7 @@ impl NewsAPI {
         Ok(url.to_string())
     }
 
-    fn fetch(&self) -> Result<NewsAPIResponse, NewsApiError> {
+    pub fn fetch(&self) -> Result<NewsAPIResponse, NewsApiError> {
         let url = self.prepare_url()?;
         let req = ureq::get(&url).set("Authorization", &self.api_key);
         let response: NewsAPIResponse = req.call()?.into_json()?;
