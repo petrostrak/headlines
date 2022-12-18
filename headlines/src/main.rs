@@ -1,7 +1,14 @@
-use std::{borrow::Cow, fmt::format};
+use std::borrow::Cow;
+
+pub const PADDING: f32 = 5.0;
+const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
+const CYAN: Color32 = Color32::from_rgb(0, 255, 255);
 
 use eframe::{
-    egui::{CentralPanel, CtxRef, FontDefinitions, FontFamily, ScrollArea, Vec2},
+    egui::{
+        CentralPanel, Color32, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
+        ScrollArea, Separator, Vec2,
+    },
     epi::App,
     run_native, NativeOptions,
 };
@@ -43,6 +50,28 @@ impl Headlines {
             .insert(0, "MesloLGS".to_string());
         ctx.set_fonts(font_def);
     }
+
+    pub fn render_news_cards(&self, ui: &mut eframe::egui::Ui) {
+        for a in &self.articles {
+            ui.add_space(PADDING);
+            // render title
+            let title = format!("▶ {}", a.title);
+            ui.colored_label(WHITE, title);
+            // render desc
+            ui.add_space(PADDING);
+            let desc = Label::new(&a.desc).text_style(eframe::egui::TextStyle::Button);
+            ui.add(desc);
+
+            // render hyperlinks
+            ui.style_mut().visuals.hyperlink_color = CYAN;
+            ui.add_space(PADDING);
+            ui.with_layout(Layout::right_to_left(), |ui| {
+                ui.add(Hyperlink::new(&a.url).text("read more ⤴"));
+            });
+            ui.add_space(PADDING);
+            ui.add(Separator::default());
+        }
+    }
 }
 
 struct NewsCardData {
@@ -64,11 +93,7 @@ impl App for Headlines {
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::auto_sized().show(ui, |ui| {
-                for a in &self.articles {
-                    ui.label(&a.title);
-                    ui.label(&a.desc);
-                    ui.label(&a.url);
-                }
+                self.render_news_cards(ui);
             })
         });
     }
