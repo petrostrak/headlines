@@ -23,6 +23,7 @@ impl App for Headlines {
     }
 
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
+        self.render_top_panel(ctx);
         CentralPanel::default().show(ctx, |ui| {
             render_header(ui);
             ScrollArea::auto_sized().show(ui, |ui| {

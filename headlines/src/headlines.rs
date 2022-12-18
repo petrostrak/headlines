@@ -1,12 +1,8 @@
 use std::borrow::Cow;
 
-use eframe::{
-    egui::{
-        CentralPanel, Color32, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
-        ScrollArea, Separator, Vec2,
-    },
-    epi::App,
-    run_native, NativeOptions,
+use eframe::egui::{
+    self, Button, Color32, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
+    Separator, TopBottomPanel,
 };
 
 pub const PADDING: f32 = 5.0;
@@ -77,5 +73,25 @@ impl Headlines {
             ui.add_space(PADDING);
             ui.add(Separator::default());
         }
+    }
+
+    pub(crate) fn render_top_panel(&self, ctx: &CtxRef) {
+        // define a TopBottomPanel widget
+        TopBottomPanel::top("top_panel").show(ctx, |ui| {
+            ui.add_space(10.);
+            egui::menu::bar(ui, |ui| {
+                // logo
+                ui.with_layout(Layout::left_to_right(), |ui| {
+                    ui.add(Label::new("📓").text_style(egui::TextStyle::Heading));
+                });
+                // controls
+                ui.with_layout(Layout::right_to_left(), |ui| {
+                    let close_btn = ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
+                    let refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
+                    let theme_btn = ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
+                });
+            });
+            ui.add_space(10.);
+        });
     }
 }
