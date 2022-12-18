@@ -39,6 +39,7 @@ impl NewsAPIResponse {
 pub struct Article {
     title: String,
     url: String,
+    description: String,
 }
 
 impl Article {
@@ -48,6 +49,10 @@ impl Article {
 
     pub fn url(&self) -> &str {
         &self.url
+    }
+
+    pub fn description(&self) -> &str {
+        &self.description
     }
 }
 
