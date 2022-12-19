@@ -4,6 +4,7 @@ use eframe::egui::{
     self, Button, Color32, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
     Separator, TopBottomPanel,
 };
+use serde::{Deserialize, Serialize};
 
 pub const PADDING: f32 = 5.0;
 const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
@@ -11,6 +12,7 @@ const BLACK: Color32 = Color32::from_rgb(0, 0, 0);
 const CYAN: Color32 = Color32::from_rgb(0, 255, 255);
 const RED: Color32 = Color32::from_rgb(255, 0, 0);
 
+#[derive(Serialize, Deserialize)]
 pub struct HeadlinesConfig {
     pub dark_mode: bool,
 }
@@ -18,6 +20,14 @@ pub struct HeadlinesConfig {
 impl HeadlinesConfig {
     fn new() -> Self {
         Self { dark_mode: true }
+    }
+}
+
+impl Default for HeadlinesConfig {
+    fn default() -> Self {
+        Self {
+            dark_mode: Default::default(),
+        }
     }
 }
 
@@ -39,9 +49,12 @@ impl Headlines {
             desc: format!("desc{}", a),
             url: format!("https://example.com/{}", a),
         });
+
+        let config: HeadlinesConfig = confy::load("headlines", "headlines").unwrap_or_default();
+
         Headlines {
             articles: Vec::from_iter(iter),
-            config: HeadlinesConfig::new(),
+            config,
         }
     }
 
