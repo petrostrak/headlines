@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use eframe::{
     egui::{
         CentralPanel, CtxRef, Hyperlink, Label, ScrollArea, Separator, TextStyle, TopBottomPanel,
@@ -8,9 +6,24 @@ use eframe::{
     epi::App,
     run_native, NativeOptions,
 };
-use headlines::{Headlines, PADDING};
+use headlines::{Headlines, NewsCardData, PADDING};
+use newsapi::NewsAPI;
 
 mod headlines;
+
+fn fetch_news(api_key: &str, articles: &mut Vec<NewsCardData>) {
+    if let Ok(response) = NewsAPI::new(api_key).fetch() {
+        let resp_articles = response.articles();
+        for a in resp_articles.iter() {
+            let news = NewsCardData {
+                title: a.title().to_string(),
+                url: a.url().to_string(),
+                desc: a.description().to_string(),
+            };
+            articles.push(news);
+        }
+    }
+}
 
 impl App for Headlines {
     fn setup(
@@ -19,6 +32,7 @@ impl App for Headlines {
         _frame: &mut eframe::epi::Frame<'_>,
         _storage: Option<&dyn eframe::epi::Storage>,
     ) {
+        fetch_news(&self.config.api_key, &mut self.articles);
         self.configure_fonts(ctx);
     }
 

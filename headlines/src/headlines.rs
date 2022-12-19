@@ -27,14 +27,14 @@ impl Default for HeadlinesConfig {
     }
 }
 
-struct NewsCardData {
-    title: String,
-    desc: String,
-    url: String,
+pub struct NewsCardData {
+    pub title: String,
+    pub desc: String,
+    pub url: String,
 }
 
 pub struct Headlines {
-    articles: Vec<NewsCardData>,
+    pub articles: Vec<NewsCardData>,
     pub config: HeadlinesConfig,
     pub api_key_initialized: bool,
 }
@@ -50,9 +50,9 @@ impl Headlines {
         let config: HeadlinesConfig = confy::load("headlines", "headlines").unwrap_or_default();
 
         Headlines {
+            api_key_initialized: !config.api_key.is_empty(),
             articles: Vec::from_iter(iter),
             config,
-            api_key_initialized: false,
         }
     }
 

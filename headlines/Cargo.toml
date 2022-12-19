@@ -11,3 +11,4 @@ eframe = "0.14.0"
 serde = {version="1.0.151", features = ["derive"]}
 tracing = "0.1.37"
 tracing-subscriber = "0.3.16"
+newsapi = {path = "../newsapi"}
