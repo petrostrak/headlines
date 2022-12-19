@@ -28,6 +28,9 @@ impl App for Headlines {
         } else {
             ctx.set_visuals(Visuals::light());
         }
+
+        self.render_config(ctx);
+
         self.render_top_panel(ctx, frame);
         CentralPanel::default().show(ctx, |ui| {
             render_header(ui);
@@ -73,6 +76,8 @@ fn render_header(ui: &mut Ui) {
 }
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let app = Headlines::new();
     let mut win_opts = NativeOptions::default();
     win_opts.initial_window_size = Some(Vec2::new(540., 960.));

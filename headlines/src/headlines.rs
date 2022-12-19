@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use eframe::egui::{
     self, Button, Color32, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
-    Separator, TopBottomPanel,
+    Separator, TopBottomPanel, Window,
 };
 use serde::{Deserialize, Serialize};
 
@@ -15,18 +15,14 @@ const RED: Color32 = Color32::from_rgb(255, 0, 0);
 #[derive(Serialize, Deserialize)]
 pub struct HeadlinesConfig {
     pub dark_mode: bool,
-}
-
-impl HeadlinesConfig {
-    fn new() -> Self {
-        Self { dark_mode: true }
-    }
+    pub api_key: String,
 }
 
 impl Default for HeadlinesConfig {
     fn default() -> Self {
         Self {
             dark_mode: Default::default(),
+            api_key: String::new(),
         }
     }
 }
@@ -143,6 +139,28 @@ impl Headlines {
                 });
             });
             ui.add_space(10.);
+        });
+    }
+
+    pub fn render_config(&mut self, ctx: &CtxRef) {
+        Window::new("Configuration").show(ctx, |ui| {
+            ui.label("Enter your API KEY for newsapi.org");
+            let text_input = ui.text_edit_singleline(&mut self.config.api_key);
+            if text_input.lost_focus() && ui.input().key_pressed(egui::Key::Enter) {
+                if let Err(e) = confy::store(
+                    "headlines",
+                    "headlines",
+                    HeadlinesConfig {
+                        dark_mode: self.config.dark_mode,
+                        api_key: self.config.api_key.to_string(),
+                    },
+                ) {
+                    tracing::error!("Failed saving app state: {}", e)
+                }
+                tracing::error!("api key set");
+            }
+            ui.label("If you haven't registered for the API_KEY, head over to ");
+            ui.hyperlink("https://newsapi.org");
         });
     }
 }
