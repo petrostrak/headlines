@@ -29,16 +29,18 @@ impl App for Headlines {
             ctx.set_visuals(Visuals::light());
         }
 
-        self.render_config(ctx);
-
-        self.render_top_panel(ctx, frame);
-        CentralPanel::default().show(ctx, |ui| {
-            render_header(ui);
-            ScrollArea::auto_sized().show(ui, |ui| {
-                self.render_news_cards(ui);
+        if !self.api_key_initialized {
+            self.render_config(ctx);
+        } else {
+            self.render_top_panel(ctx, frame);
+            CentralPanel::default().show(ctx, |ui| {
+                render_header(ui);
+                ScrollArea::auto_sized().show(ui, |ui| {
+                    self.render_news_cards(ui);
+                });
+                render_footer(ctx);
             });
-            render_footer(ctx);
-        });
+        }
     }
 
     fn name(&self) -> &str {

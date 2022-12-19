@@ -36,6 +36,7 @@ struct NewsCardData {
 pub struct Headlines {
     articles: Vec<NewsCardData>,
     pub config: HeadlinesConfig,
+    pub api_key_initialized: bool,
 }
 
 impl Headlines {
@@ -51,6 +52,7 @@ impl Headlines {
         Headlines {
             articles: Vec::from_iter(iter),
             config,
+            api_key_initialized: false,
         }
     }
 
@@ -157,6 +159,8 @@ impl Headlines {
                 ) {
                     tracing::error!("Failed saving app state: {}", e)
                 }
+                self.api_key_initialized = true;
+
                 tracing::error!("api key set");
             }
             ui.label("If you haven't registered for the API_KEY, head over to ");
