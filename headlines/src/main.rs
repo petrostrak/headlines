@@ -84,7 +84,7 @@ fn fetch_news(api_key: &str, news_tx: &mut std::sync::mpsc::Sender<NewsCardData>
             let news = NewsCardData {
                 title: a.title().to_string(),
                 url: a.url().to_string(),
-                desc: a.description().to_string(),
+                desc: a.desc().map(|s| s.to_string()).unwrap_or("...".to_string()),
             };
             if let Err(e) = news_tx.send(news) {
                 tracing::error!("Error sending news data: {}", e);

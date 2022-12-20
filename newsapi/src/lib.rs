@@ -11,10 +11,10 @@ pub enum NewsApiError {
     RequestFailed(#[from] ureq::Error),
     #[error("Failed converting response to string")]
     FailedResponseToString(#[from] std::io::Error),
-    #[error("Article parsing failed")]
+    #[error("Article Parsing failed")]
     ArticleParseFailed(#[from] serde_json::Error),
     #[error("Url parsing failed")]
-    UrlParseFailed(#[from] url::ParseError),
+    UrlParsing(#[from] url::ParseError),
     #[error("Request failed: {0}")]
     BadRequest(&'static str),
     #[error("Async request failed")]
@@ -39,7 +39,7 @@ impl NewsAPIResponse {
 pub struct Article {
     title: String,
     url: String,
-    description: String,
+    description: Option<String>,
 }
 
 impl Article {
@@ -51,8 +51,8 @@ impl Article {
         &self.url
     }
 
-    pub fn description(&self) -> &str {
-        &self.description
+    pub fn desc(&self) -> Option<&String> {
+        self.description.as_ref()
     }
 }
 
@@ -70,16 +70,12 @@ impl ToString for Endpoint {
 
 pub enum Country {
     Us,
-    Gr,
-    Jp,
 }
 
 impl ToString for Country {
     fn to_string(&self) -> String {
         match self {
             Self::Us => "us".to_string(),
-            Self::Gr => "gr".to_string(),
-            Self::Jp => "jp".to_string(),
         }
     }
 }
@@ -125,14 +121,12 @@ impl NewsAPI {
         let url = self.prepare_url()?;
         let req = ureq::get(&url).set("Authorization", &self.api_key);
         let response: NewsAPIResponse = req.call()?.into_json()?;
-
         match response.status.as_str() {
             "ok" => return Ok(response),
             _ => return Err(map_response_err(response.code)),
         }
     }
 
-  
     #[cfg(feature = "async")]
     pub async fn fetch_async(&self) -> Result<NewsAPIResponse, NewsApiError> {
         let url = self.prepare_url()?;
@@ -160,7 +154,7 @@ impl NewsAPI {
 fn map_response_err(code: Option<String>) -> NewsApiError {
     if let Some(code) = code {
         match code.as_str() {
-            "apiKeyDisabled" => NewsApiError::BadRequest("Your api key has beed disabled"),
+            "apiKeyDisabled" => NewsApiError::BadRequest("Your API key has been disabled"),
             _ => NewsApiError::BadRequest("Unknown error"),
         }
     } else {
