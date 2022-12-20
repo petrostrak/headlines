@@ -1,3 +1,5 @@
+use std::{sync::mpsc::channel, thread};
+
 use eframe::{
     egui::{
         CentralPanel, CtxRef, Hyperlink, Label, ScrollArea, Separator, TextStyle, TopBottomPanel,
@@ -11,20 +13,6 @@ use newsapi::NewsAPI;
 
 mod headlines;
 
-fn fetch_news(api_key: &str, articles: &mut Vec<NewsCardData>) {
-    if let Ok(response) = NewsAPI::new(api_key).fetch() {
-        let resp_articles = response.articles();
-        for a in resp_articles.iter() {
-            let news = NewsCardData {
-                title: a.title().to_string(),
-                url: a.url().to_string(),
-                desc: a.description().to_string(),
-            };
-            articles.push(news);
-        }
-    }
-}
-
 impl App for Headlines {
     fn setup(
         &mut self,
@@ -32,7 +20,27 @@ impl App for Headlines {
         _frame: &mut eframe::epi::Frame<'_>,
         _storage: Option<&dyn eframe::epi::Storage>,
     ) {
-        fetch_news(&self.config.api_key, &mut self.articles);
+        let api_key = self.config.api_key.to_string();
+
+        let (news_tx, news_rx) = channel();
+
+        self.news_rx = Some(news_rx);
+
+        thread::spawn(move || {
+            if let Ok(response) = NewsAPI::new(&api_key).fetch() {
+                let resp_articles = response.articles();
+                for a in resp_articles.iter() {
+                    let news = NewsCardData {
+                        title: a.title().to_string(),
+                        url: a.url().to_string(),
+                        desc: a.description().to_string(),
+                    };
+                    if let Err(e) = news_tx.send(news) {
+                        tracing::error!("Error sending news data: {}", e);
+                    }
+                }
+            }
+        });
         self.configure_fonts(ctx);
     }
 

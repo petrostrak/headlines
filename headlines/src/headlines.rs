@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, sync::mpsc::Receiver};
 
 use eframe::egui::{
     self, Button, Color32, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
@@ -37,22 +37,18 @@ pub struct Headlines {
     pub articles: Vec<NewsCardData>,
     pub config: HeadlinesConfig,
     pub api_key_initialized: bool,
+    pub news_rx: Option<Receiver<NewsCardData>>,
 }
 
 impl Headlines {
     pub fn new() -> Headlines {
-        let iter = (0..20).map(|a| NewsCardData {
-            title: format!("title{}", a),
-            desc: format!("desc{}", a),
-            url: format!("https://example.com/{}", a),
-        });
-
         let config: HeadlinesConfig = confy::load("headlines", "headlines").unwrap_or_default();
 
         Headlines {
             api_key_initialized: !config.api_key.is_empty(),
-            articles: Vec::from_iter(iter),
+            articles: vec![],
             config,
+            news_rx: None,
         }
     }
 
