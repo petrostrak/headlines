@@ -45,6 +45,8 @@ impl App for Headlines {
     }
 
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
+        ctx.request_repaint();
+
         if self.config.dark_mode {
             ctx.set_visuals(Visuals::dark());
         } else {
