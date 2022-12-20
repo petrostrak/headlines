@@ -1,4 +1,7 @@
-use std::{borrow::Cow, sync::mpsc::Receiver};
+use std::{
+    borrow::Cow,
+    sync::mpsc::{Receiver, SyncSender},
+};
 
 use eframe::egui::{
     self, Button, Color32, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
@@ -11,6 +14,10 @@ const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
 const BLACK: Color32 = Color32::from_rgb(0, 0, 0);
 const CYAN: Color32 = Color32::from_rgb(0, 255, 255);
 const RED: Color32 = Color32::from_rgb(255, 0, 0);
+
+pub enum Msg {
+    ApiKeySet(String),
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct HeadlinesConfig {
@@ -38,6 +45,7 @@ pub struct Headlines {
     pub config: HeadlinesConfig,
     pub api_key_initialized: bool,
     pub news_rx: Option<Receiver<NewsCardData>>,
+    pub app_tx: Option<SyncSender<Msg>>,
 }
 
 impl Headlines {
@@ -49,6 +57,7 @@ impl Headlines {
             articles: vec![],
             config,
             news_rx: None,
+            app_tx: None,
         }
     }
 
@@ -156,6 +165,9 @@ impl Headlines {
                     tracing::error!("Failed saving app state: {}", e)
                 }
                 self.api_key_initialized = true;
+                if let Some(tx) = &self.app_tx {
+                    tx.send(Msg::ApiKeySet(self.config.api_key.to_string()));
+                }
 
                 tracing::error!("api key set");
             }
