@@ -4,9 +4,10 @@ use std::{
 };
 
 use eframe::egui::{
-    self, Button, Color32, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
-    Separator, TopBottomPanel, Window,
+    self, Button, CentralPanel, Color32, ComboBox, CtxRef, FontDefinitions, FontFamily, Hyperlink,
+    Label, Layout, Separator, TopBottomPanel, Window,
 };
+use newsapi::Country;
 use serde::{Deserialize, Serialize};
 
 pub const PADDING: f32 = 5.0;
@@ -46,6 +47,7 @@ pub struct Headlines {
     pub api_key_initialized: bool,
     pub news_rx: Option<Receiver<NewsCardData>>,
     pub app_tx: Option<SyncSender<Msg>>,
+    selected: Country,
 }
 
 impl Headlines {
@@ -58,6 +60,7 @@ impl Headlines {
             config,
             news_rx: None,
             app_tx: None,
+            selected: Country::Us,
         }
     }
 
@@ -119,10 +122,6 @@ impl Headlines {
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.add_space(10.);
             egui::menu::bar(ui, |ui| {
-                // logo
-                ui.with_layout(Layout::left_to_right(), |ui| {
-                    ui.add(Label::new("📓").text_style(egui::TextStyle::Heading));
-                });
                 // controls
                 ui.with_layout(Layout::right_to_left(), |ui| {
                     let close_btn = ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
@@ -143,6 +142,13 @@ impl Headlines {
                     if theme_btn.clicked() {
                         self.config.dark_mode = !self.config.dark_mode
                     }
+                    let combo_box = ComboBox::from_label("")
+                        .selected_text(format!("{:?}", &self.selected))
+                        .show_ui(ui, |ui| {
+                            ui.selectable_value(&mut self.selected, Country::Us, "us");
+                            ui.selectable_value(&mut self.selected, Country::Jp, "jp");
+                            ui.selectable_value(&mut self.selected, Country::Gr, "gr");
+                        });
                 });
             });
             ui.add_space(10.);

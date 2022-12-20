@@ -68,6 +68,7 @@ impl ToString for Endpoint {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub enum Country {
     Us,
     Jp,
