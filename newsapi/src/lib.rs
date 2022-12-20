@@ -70,12 +70,16 @@ impl ToString for Endpoint {
 
 pub enum Country {
     Us,
+    Jp,
+    Gr,
 }
 
 impl ToString for Country {
     fn to_string(&self) -> String {
         match self {
             Self::Us => "us".to_string(),
+            Self::Jp => "jp".to_string(),
+            Self::Gr => "gr".to_string(),
         }
     }
 }
@@ -91,7 +95,7 @@ impl NewsAPI {
         NewsAPI {
             api_key: api_key.to_string(),
             endpoint: Endpoint::TopHeadlines,
-            country: Country::Us,
+            country: Country::Jp,
         }
     }
 

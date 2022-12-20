@@ -65,7 +65,7 @@ impl Headlines {
         let mut font_def = FontDefinitions::default();
         font_def.font_data.insert(
             "MesloLGS".to_string(),
-            Cow::Borrowed(include_bytes!("../../MesloLGS_NF_Regular.ttf")),
+            Cow::Borrowed(include_bytes!("../../NotoSerifJP-Regular.otf")),
         );
         font_def.family_and_size.insert(
             eframe::egui::TextStyle::Heading,
