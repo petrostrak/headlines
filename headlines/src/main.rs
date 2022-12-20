@@ -54,6 +54,8 @@ impl App for Headlines {
         if !self.api_key_initialized {
             self.render_config(ctx);
         } else {
+            self.preload_articles();
+
             self.render_top_panel(ctx, frame);
             CentralPanel::default().show(ctx, |ui| {
                 render_header(ui);

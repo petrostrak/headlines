@@ -163,4 +163,13 @@ impl Headlines {
             ui.hyperlink("https://newsapi.org");
         });
     }
+
+    pub fn preload_articles(&mut self) {
+        if let Some(rx) = &self.news_rx {
+            match rx.try_recv() {
+                Ok(news_data) => self.articles.push(news_data),
+                Err(e) => tracing::warn!("Error receiving msg: {}", e),
+            }
+        }
+    }
 }
