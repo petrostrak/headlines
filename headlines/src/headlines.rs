@@ -50,7 +50,7 @@ pub struct Headlines {
 
 impl Headlines {
     pub fn new() -> Headlines {
-        let config: HeadlinesConfig = confy::load("headlines", "headlines").unwrap_or_default();
+        let config: HeadlinesConfig = confy::load("headlines").unwrap_or_default();
 
         Headlines {
             api_key_initialized: !config.api_key.is_empty(),
@@ -129,7 +129,7 @@ impl Headlines {
                     if close_btn.clicked() {
                         frame.quit();
                     }
-                    let refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
+                    let _refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
                     let theme_btn = ui.add(
                         Button::new({
                             if self.config.dark_mode {
@@ -155,7 +155,6 @@ impl Headlines {
             let text_input = ui.text_edit_singleline(&mut self.config.api_key);
             if text_input.lost_focus() && ui.input().key_pressed(egui::Key::Enter) {
                 if let Err(e) = confy::store(
-                    "headlines",
                     "headlines",
                     HeadlinesConfig {
                         dark_mode: self.config.dark_mode,
