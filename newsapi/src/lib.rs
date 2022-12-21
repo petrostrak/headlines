@@ -72,6 +72,7 @@ impl ToString for Endpoint {
 pub enum Country {
     Us,
     Jp,
+    De,
     Gr,
 }
 
@@ -80,6 +81,7 @@ impl ToString for Country {
         match self {
             Self::Us => "us".to_string(),
             Self::Jp => "jp".to_string(),
+            Self::De => "de".to_string(),
             Self::Gr => "gr".to_string(),
         }
     }

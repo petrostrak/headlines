@@ -158,21 +158,31 @@ impl Headlines {
                     let _combo_box = ComboBox::from_label("")
                         .selected_text(format!("{:?}", &self.selected))
                         .show_ui(ui, |ui| {
-                            let us = ui.selectable_value(&mut self.selected, Country::Us, "us");
+                            let us =
+                                ui.selectable_value(&mut self.selected, Country::Us, "English");
                             if us.clicked() {
                                 self.articles.clear();
                                 if let Some(tx) = &self.country_tx {
                                     tx.send(CountrySelection::Language(self.selected));
                                 }
                             }
-                            let jp = ui.selectable_value(&mut self.selected, Country::Jp, "jp");
+                            let jp = ui.selectable_value(&mut self.selected, Country::Jp, "日本語");
                             if jp.clicked() {
                                 self.articles.clear();
                                 if let Some(tx) = &self.country_tx {
                                     tx.send(CountrySelection::Language(self.selected));
                                 }
                             }
-                            let gr = ui.selectable_value(&mut self.selected, Country::Gr, "gr");
+                            let de =
+                                ui.selectable_value(&mut self.selected, Country::De, "Deutsch");
+                            if de.clicked() {
+                                self.articles.clear();
+                                if let Some(tx) = &self.country_tx {
+                                    tx.send(CountrySelection::Language(self.selected));
+                                }
+                            }
+                            let gr =
+                                ui.selectable_value(&mut self.selected, Country::Gr, "Ελληνικά");
                             if gr.clicked() {
                                 self.articles.clear();
                                 if let Some(tx) = &self.country_tx {
