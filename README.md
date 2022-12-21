@@ -5,5 +5,5 @@ To launch the app:
 ```
 cd headlines && cargo run
 ```
-![alt text](https://github.com/petrostrak/headlines/blob/master/headlines_1.png)
-![alt text](https://github.com/petrostrak/headlines/blob/master/headlines_2.png)
+![alt text](https://github.com/petrostrak/headlines/blob/main/headlines_1.png)
+![alt text](https://github.com/petrostrak/headlines/blob/main/headlines_2.png)
