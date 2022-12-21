@@ -77,11 +77,15 @@ impl App for Headlines {
 
             self.render_top_panel(ctx, frame);
             CentralPanel::default().show(ctx, |ui| {
-                render_header(ui);
-                ScrollArea::auto_sized().show(ui, |ui| {
-                    self.render_news_cards(ui);
-                });
-                render_footer(ctx);
+                if self.articles.is_empty() {
+                    ui.vertical_centered_justified(|ui| ui.heading("Loading..."));
+                } else {
+                    render_header(ui);
+                    ScrollArea::auto_sized().show(ui, |ui| {
+                        self.render_news_cards(ui);
+                    });
+                    render_footer(ctx);
+                }
             });
         }
     }
