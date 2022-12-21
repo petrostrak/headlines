@@ -26,21 +26,20 @@ impl App for Headlines {
         let api_key = self.config.api_key.to_string();
 
         let (mut news_tx, news_rx) = channel();
-        let (app_tx, app_rx) = sync_channel(1);
         let (country_tx, country_rx) = channel();
+        let (app_tx, app_rx) = sync_channel(1);
 
         self.app_tx = Some(app_tx);
-
         self.news_rx = Some(news_rx);
-
         self.country_tx = Some(country_tx);
 
         thread::spawn(move || {
             if !api_key.is_empty() {
+                fetch_news(&api_key, &mut news_tx, Country::Us);
                 loop {
                     match country_rx.recv() {
                         Ok(CountrySelection::Language(country)) => {
-                            fetch_news(&api_key, &mut news_tx, country)
+                            fetch_news(&api_key, &mut news_tx, country);
                         }
                         Err(e) => tracing::error!("failed receiving msg: {}", e),
                     }

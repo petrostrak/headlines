@@ -149,26 +149,23 @@ impl Headlines {
                     if theme_btn.clicked() {
                         self.config.dark_mode = !self.config.dark_mode
                     }
-                    let combo_box = ComboBox::from_label("")
+                    let _combo_box = ComboBox::from_label("")
                         .selected_text(format!("{:?}", &self.selected))
                         .show_ui(ui, |ui| {
                             let us = ui.selectable_value(&mut self.selected, Country::Us, "us");
                             if us.clicked() {
-                                self.selected = Country::Us;
                                 if let Some(tx) = &self.country_tx {
                                     tx.send(CountrySelection::Language(self.selected));
                                 }
                             }
                             let jp = ui.selectable_value(&mut self.selected, Country::Jp, "jp");
                             if jp.clicked() {
-                                self.selected = Country::Jp;
                                 if let Some(tx) = &self.country_tx {
                                     tx.send(CountrySelection::Language(self.selected));
                                 }
                             }
                             let gr = ui.selectable_value(&mut self.selected, Country::Gr, "gr");
                             if gr.clicked() {
-                                self.selected = Country::Gr;
                                 if let Some(tx) = &self.country_tx {
                                     tx.send(CountrySelection::Language(self.selected));
                                 }
