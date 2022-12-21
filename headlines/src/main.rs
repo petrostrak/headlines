@@ -11,8 +11,8 @@ use eframe::{
     epi::App,
     run_native, NativeOptions,
 };
-use headlines::{Headlines, Msg, NewsCardData, PADDING};
-use newsapi::NewsAPI;
+use headlines::{CountrySelection, Headlines, Msg, NewsCardData, PADDING};
+use newsapi::{Country, NewsAPI};
 
 mod headlines;
 
@@ -27,18 +27,30 @@ impl App for Headlines {
 
         let (mut news_tx, news_rx) = channel();
         let (app_tx, app_rx) = sync_channel(1);
+        let (country_tx, country_rx) = channel();
 
         self.app_tx = Some(app_tx);
 
         self.news_rx = Some(news_rx);
 
+        self.country_tx = Some(country_tx);
+
         thread::spawn(move || {
             if !api_key.is_empty() {
-                fetch_news(&api_key, &mut news_tx);
+                loop {
+                    match country_rx.recv() {
+                        Ok(CountrySelection::Language(country)) => {
+                            fetch_news(&api_key, &mut news_tx, country)
+                        }
+                        Err(e) => tracing::error!("failed receiving msg: {}", e),
+                    }
+                }
             } else {
                 loop {
                     match app_rx.recv() {
-                        Ok(Msg::ApiKeySet(api_key)) => fetch_news(&api_key, &mut news_tx),
+                        Ok(Msg::ApiKeySet(api_key)) => {
+                            fetch_news(&api_key, &mut news_tx, Country::Us)
+                        }
                         Err(e) => tracing::error!("failed receiving msg: {}", e),
                     }
                 }
@@ -77,8 +89,12 @@ impl App for Headlines {
     }
 }
 
-fn fetch_news(api_key: &str, news_tx: &mut std::sync::mpsc::Sender<NewsCardData>) {
-    if let Ok(response) = NewsAPI::new(&api_key).fetch() {
+fn fetch_news(
+    api_key: &str,
+    news_tx: &mut std::sync::mpsc::Sender<NewsCardData>,
+    country: Country,
+) {
+    if let Ok(response) = NewsAPI::new(&api_key, country).fetch() {
         let resp_articles = response.articles();
         for a in resp_articles.iter() {
             let news = NewsCardData {

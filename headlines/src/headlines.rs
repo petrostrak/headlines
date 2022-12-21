@@ -1,11 +1,11 @@
 use std::{
     borrow::Cow,
-    sync::mpsc::{Receiver, SyncSender},
+    sync::mpsc::{Receiver, Sender, SyncSender},
 };
 
 use eframe::egui::{
-    self, Button, CentralPanel, Color32, ComboBox, CtxRef, FontDefinitions, FontFamily, Hyperlink,
-    Label, Layout, Separator, TopBottomPanel, Window,
+    self, Button, Color32, ComboBox, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
+    Separator, TopBottomPanel, Window,
 };
 use newsapi::Country;
 use serde::{Deserialize, Serialize};
@@ -18,6 +18,10 @@ const RED: Color32 = Color32::from_rgb(255, 0, 0);
 
 pub enum Msg {
     ApiKeySet(String),
+}
+
+pub enum CountrySelection {
+    Language(Country),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -46,8 +50,9 @@ pub struct Headlines {
     pub config: HeadlinesConfig,
     pub api_key_initialized: bool,
     pub news_rx: Option<Receiver<NewsCardData>>,
+    pub country_tx: Option<Sender<CountrySelection>>,
     pub app_tx: Option<SyncSender<Msg>>,
-    selected: Country,
+    pub selected: Country,
 }
 
 impl Headlines {
@@ -59,6 +64,7 @@ impl Headlines {
             articles: vec![],
             config,
             news_rx: None,
+            country_tx: None,
             app_tx: None,
             selected: Country::Us,
         }
@@ -128,7 +134,8 @@ impl Headlines {
                     if close_btn.clicked() {
                         frame.quit();
                     }
-                    let _refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
+                    let refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
+                    if refresh_btn.clicked() {}
                     let theme_btn = ui.add(
                         Button::new({
                             if self.config.dark_mode {
@@ -145,9 +152,27 @@ impl Headlines {
                     let combo_box = ComboBox::from_label("")
                         .selected_text(format!("{:?}", &self.selected))
                         .show_ui(ui, |ui| {
-                            ui.selectable_value(&mut self.selected, Country::Us, "us");
-                            ui.selectable_value(&mut self.selected, Country::Jp, "jp");
-                            ui.selectable_value(&mut self.selected, Country::Gr, "gr");
+                            let us = ui.selectable_value(&mut self.selected, Country::Us, "us");
+                            if us.clicked() {
+                                self.selected = Country::Us;
+                                if let Some(tx) = &self.country_tx {
+                                    tx.send(CountrySelection::Language(self.selected));
+                                }
+                            }
+                            let jp = ui.selectable_value(&mut self.selected, Country::Jp, "jp");
+                            if jp.clicked() {
+                                self.selected = Country::Jp;
+                                if let Some(tx) = &self.country_tx {
+                                    tx.send(CountrySelection::Language(self.selected));
+                                }
+                            }
+                            let gr = ui.selectable_value(&mut self.selected, Country::Gr, "gr");
+                            if gr.clicked() {
+                                self.selected = Country::Gr;
+                                if let Some(tx) = &self.country_tx {
+                                    tx.send(CountrySelection::Language(self.selected));
+                                }
+                            }
                         });
                 });
             });

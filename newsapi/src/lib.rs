@@ -68,7 +68,7 @@ impl ToString for Endpoint {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Country {
     Us,
     Jp,
@@ -92,11 +92,11 @@ pub struct NewsAPI {
 }
 
 impl NewsAPI {
-    pub fn new(api_key: &str) -> NewsAPI {
+    pub fn new(api_key: &str, country: Country) -> NewsAPI {
         NewsAPI {
             api_key: api_key.to_string(),
             endpoint: Endpoint::TopHeadlines,
-            country: Country::Jp,
+            country,
         }
     }
 
