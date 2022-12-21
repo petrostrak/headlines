@@ -41,6 +41,9 @@ impl App for Headlines {
                         Ok(CountrySelection::Language(country)) => {
                             fetch_news(&api_key, &mut news_tx, country);
                         }
+                        Ok(CountrySelection::Refresh(country)) => {
+                            fetch_news(&api_key, &mut news_tx, country)
+                        }
                         Err(e) => tracing::error!("failed receiving msg: {}", e),
                     }
                 }

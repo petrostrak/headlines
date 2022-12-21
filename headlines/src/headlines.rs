@@ -22,6 +22,7 @@ pub enum Msg {
 
 pub enum CountrySelection {
     Language(Country),
+    Refresh(Country),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -135,7 +136,12 @@ impl Headlines {
                         frame.quit();
                     }
                     let refresh_btn = ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
-                    if refresh_btn.clicked() {}
+                    if refresh_btn.clicked() {
+                        if let Some(tx) = &self.country_tx {
+                            self.articles.clear();
+                            tx.send(CountrySelection::Refresh(self.selected));
+                        }
+                    }
                     let theme_btn = ui.add(
                         Button::new({
                             if self.config.dark_mode {
@@ -154,18 +160,21 @@ impl Headlines {
                         .show_ui(ui, |ui| {
                             let us = ui.selectable_value(&mut self.selected, Country::Us, "us");
                             if us.clicked() {
+                                self.articles.clear();
                                 if let Some(tx) = &self.country_tx {
                                     tx.send(CountrySelection::Language(self.selected));
                                 }
                             }
                             let jp = ui.selectable_value(&mut self.selected, Country::Jp, "jp");
                             if jp.clicked() {
+                                self.articles.clear();
                                 if let Some(tx) = &self.country_tx {
                                     tx.send(CountrySelection::Language(self.selected));
                                 }
                             }
                             let gr = ui.selectable_value(&mut self.selected, Country::Gr, "gr");
                             if gr.clicked() {
+                                self.articles.clear();
                                 if let Some(tx) = &self.country_tx {
                                     tx.send(CountrySelection::Language(self.selected));
                                 }
