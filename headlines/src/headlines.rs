@@ -4,8 +4,8 @@ use std::{
 };
 
 use eframe::egui::{
-    self, Button, Color32, ComboBox, CtxRef, FontDefinitions, FontFamily, Hyperlink, Label, Layout,
-    Separator, TopBottomPanel, Window,
+    self, Button, CentralPanel, Color32, ComboBox, CtxRef, FontDefinitions, FontFamily, Hyperlink,
+    Label, Layout, Separator, TopBottomPanel, Window,
 };
 use newsapi::Country;
 use serde::{Deserialize, Serialize};
@@ -187,28 +187,30 @@ impl Headlines {
     }
 
     pub fn render_config(&mut self, ctx: &CtxRef) {
-        Window::new("Configuration").show(ctx, |ui| {
-            ui.label("Enter your API KEY for newsapi.org");
-            let text_input = ui.text_edit_singleline(&mut self.config.api_key);
-            if text_input.lost_focus() && ui.input().key_pressed(egui::Key::Enter) {
-                if let Err(e) = confy::store(
-                    "headlines",
-                    HeadlinesConfig {
-                        dark_mode: self.config.dark_mode,
-                        api_key: self.config.api_key.to_string(),
-                    },
-                ) {
-                    tracing::error!("Failed saving app state: {}", e)
-                }
-                self.api_key_initialized = true;
-                if let Some(tx) = &self.app_tx {
-                    tx.send(Msg::ApiKeySet(self.config.api_key.to_string()));
-                }
+        CentralPanel::default().show(ctx, |ui| {
+            Window::new("Configuration").show(ctx, |ui| {
+                ui.label("Enter your API KEY for newsapi.org");
+                let text_input = ui.text_edit_singleline(&mut self.config.api_key);
+                if text_input.lost_focus() && ui.input().key_pressed(egui::Key::Enter) {
+                    if let Err(e) = confy::store(
+                        "headlines",
+                        HeadlinesConfig {
+                            dark_mode: self.config.dark_mode,
+                            api_key: self.config.api_key.to_string(),
+                        },
+                    ) {
+                        tracing::error!("Failed saving app state: {}", e)
+                    }
+                    self.api_key_initialized = true;
+                    if let Some(tx) = &self.app_tx {
+                        tx.send(Msg::ApiKeySet(self.config.api_key.to_string()));
+                    }
 
-                tracing::error!("api key set");
-            }
-            ui.label("If you haven't registered for the API_KEY, head over to ");
-            ui.hyperlink("https://newsapi.org");
+                    tracing::error!("api key set");
+                }
+                ui.label("If you haven't registered for the API_KEY, head over to ");
+                ui.hyperlink("https://newsapi.org");
+            });
         });
     }
 
